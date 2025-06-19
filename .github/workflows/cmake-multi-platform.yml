@@ -3,11 +3,8 @@ name: Build and Release Phase Align
 on:
   workflow_dispatch:
 
-
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: false
       matrix:
@@ -19,14 +16,17 @@ jobs:
             c_compiler: cl
             cpp_compiler: cl
             package_ext: zip
+            job_name: build-windows-cl
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
             package_ext: tar.gz
+            job_name: build-ubuntu-gcc
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
             package_ext: tar.gz
+            job_name: build-ubuntu-clang
         exclude:
           - os: windows-latest
             c_compiler: gcc
@@ -34,6 +34,9 @@ jobs:
             c_compiler: clang
           - os: ubuntu-latest
             c_compiler: cl
+
+    name: ${{ matrix.job_name }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -94,17 +97,22 @@ jobs:
           name: phase-align-${{ matrix.os }}-${{ matrix.c_compiler }}
           path: ${{ steps.strings.outputs.build-output-dir }}/phase-align-*.${{ matrix.package_ext }}
 
-
   release:
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/')
+    name: Release
     runs-on: ubuntu-latest
+    needs:
+      - build-ubuntu-gcc
+      - build-ubuntu-clang
+      - build-windows-cl
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*
+

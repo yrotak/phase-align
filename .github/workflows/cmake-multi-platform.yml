@@ -94,8 +94,9 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: phase-align-${{ matrix.os }}
+          name: phase-align-${{ matrix.os }}-${{ matrix.c_compiler }}
           path: ${{ steps.strings.outputs.build-output-dir }}/phase-align-*.${{ matrix.package_ext }}
+
 
   release:
     needs: build

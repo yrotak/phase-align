@@ -80,16 +80,17 @@ jobs:
 
       - name: Package
         shell: bash
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: |
-          cd ${{ steps.strings.outputs.build-output-dir }}
           mkdir package
           cp phase-align* package/
           cd package
           if [[ "${{ matrix.package_ext }}" == "zip" ]]; then
-            7z a ../phase-align-${{ matrix.os }}.zip *
+            7z a ../phase-align-${{ matrix.os }}-${{ matrix.c_compiler }}.zip *
           else
-            tar -czvf ../phase-align-${{ matrix.os }}.tar.gz *
+            tar -czvf ../phase-align-${{ matrix.os }}-${{ matrix.c_compiler }}.tar.gz *
           fi
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

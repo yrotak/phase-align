@@ -13,6 +13,13 @@ add_compile_options(-O3 -march=native)
 file(GLOB_RECURSE SRC src/*.cpp src/*.c)
 file(GLOB_RECURSE HEADERS src/*.hpp src/*.h src/*.inl)
 
+if(NOT SDL2_INCLUDE_DIRS)
+    set(SDL2_INCLUDE_DIRS $ENV{SDL2_INCLUDE_DIR})
+endif()
+if(NOT SDL2_LIBRARIES)
+    set(SDL2_LIBRARIES $ENV{SDL2_LIBRARY})
+endif()
+
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 

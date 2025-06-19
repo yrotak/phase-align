@@ -1,11 +1,8 @@
 name: Build and Release Phase Align
 
 on:
-  push:
-    branches: [ "main" ]
-    tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
+
 
 jobs:
   build:
@@ -82,15 +79,14 @@ jobs:
         shell: bash
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: |
-          mkdir package
-          cp phase-align* package/
+          mkdir -p package
+          find . -maxdepth 1 -type f -name "phase-align*" -exec cp {} package/ \;
           cd package
           if [[ "${{ matrix.package_ext }}" == "zip" ]]; then
             7z a ../phase-align-${{ matrix.os }}-${{ matrix.c_compiler }}.zip *
           else
             tar -czvf ../phase-align-${{ matrix.os }}-${{ matrix.c_compiler }}.tar.gz *
           fi
-
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

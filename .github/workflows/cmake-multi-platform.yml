@@ -14,7 +14,7 @@ on:
         required: true
 permissions:
   contents: write
-  releases: write
+
 jobs:
   build:
     strategy:
@@ -110,24 +110,31 @@ jobs:
     needs: [build]
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_release }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed to get tag history
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Setup GitHub CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gh
-
-      - name: Create release
+      - name: Create Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ github.event.inputs.release_tag }}
+          tag_name: ${{ github.event.inputs.release_tag }}
+          body: "Release ${{ github.event.inputs.release_tag }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.event.inputs.release_tag }}
-        run: |
-          gh release create "$tag" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="Phase Align ${tag#v}" \
-              --generate-notes \
-              artifacts/**/*
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/**/*
+          asset_name: ${{ basename(asset_path) }}
+    

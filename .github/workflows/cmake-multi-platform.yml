@@ -113,26 +113,19 @@ jobs:
     needs: [build]
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_release }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Needed to fetch all history for tagging
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Create Git tag
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git tag -a ${{ github.event.inputs.release_tag }} -m "Release ${{ github.event.inputs.release_tag }}"
-          git push origin ${{ github.event.inputs.release_tag }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Create GitHub Pre-release
+        uses: marvinpinto/action-automatic-releases@latest
         with:
-          tag_name: ${{ github.event.inputs.release_tag }}
-          files: artifacts/**/*
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          title: "Build - $(date +'%Y-%m-%d %H:%M')"
+          files: |
+            artifacts/**/*
+            LICENSE.txt

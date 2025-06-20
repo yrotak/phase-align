@@ -104,7 +104,7 @@ jobs:
           name: phase-align-${{ matrix.os }}-${{ matrix.c_compiler }}
           path: ${{ steps.strings.outputs.build-output-dir }}/phase-align-*.${{ matrix.package_ext }}
 
-  release:
+    release:
     name: Release
     runs-on: ubuntu-latest
     needs: [build]
@@ -112,7 +112,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Needed to get tag history
+          fetch-depth: 0
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -120,8 +120,8 @@ jobs:
           path: artifacts
 
       - name: Create Release
-        uses: actions/create-release@v1
         id: create_release
+        uses: actions/create-release@v1
         with:
           draft: false
           prerelease: false
@@ -132,9 +132,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/**/*
-          asset_name: ${{ basename(asset_path) }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Uploading assets..."
+          for file in $(find artifacts -type f); do
+            echo "Uploading $file"
+            curl \
+              -sSf \
+              -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: $(file --mime-type -b "$file")" \
+              --data-binary @"$file" \
+              "${{ steps.create_release.outputs.upload_url }}?name=$(basename "$file")"
+          done
+
     

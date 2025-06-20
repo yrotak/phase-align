@@ -113,6 +113,11 @@ jobs:
     needs: [build]
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_release }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed to fetch all history for tagging
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:

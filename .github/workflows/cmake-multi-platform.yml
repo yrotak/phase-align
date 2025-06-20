@@ -12,7 +12,9 @@ on:
         type: boolean
         default: true
         required: true
-
+permissions:
+  contents: write
+  releases: write
 jobs:
   build:
     strategy:

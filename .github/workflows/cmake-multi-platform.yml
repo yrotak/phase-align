@@ -128,4 +128,3 @@ jobs:
           title: "Build - $(date +'%Y-%m-%d %H:%M')"
           files: |
             artifacts/**/*
-            LICENSE.txt

@@ -1,5 +1,5 @@
 # phase-align
-Same a Auto-Align Pro but free and ugly.
+This tool can be use as an alternative to Auto-Align Post but free and ugly.
 
 For now it only supports WAV files. All the files must use the same bitrate.
 There is 2 options:
